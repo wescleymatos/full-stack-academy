@@ -35,12 +35,18 @@ app.get('/calculadora', (req, res) => {
     res.render('calculadora', { resultado })
 })
 
+app.get('/operacoes', (req, res) => {
+    const operacoes = app.db.collection('operacoes')
+    operacoes.find({}).toArray((err, operacoes) => res.send(operacoes))
+})
+
 
 MongoClient.connect(mongoUri, (err, db) => {
     if (err) {
         return
     }
 
+    app.db = db
     app.listen(port, () => console.log('Server running...'))
 
     // const operacao = {
