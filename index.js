@@ -1,3 +1,6 @@
+const MongoClient = require('mongodb').MongoClient
+const mongoUri = 'mongodb://admin:VuOd3VKlZCpBVLYQ@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/meu-dinheiro?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin'
+
 const path = require('path')
 const express = require('express')
 const app = express()
@@ -32,4 +35,20 @@ app.get('/calculadora', (req, res) => {
     res.render('calculadora', { resultado })
 })
 
-app.listen(port, () => console.log('Server running...'))
+
+MongoClient.connect(mongoUri, (err, db) => {
+    if (err) {
+        return
+    }
+
+    app.listen(port, () => console.log('Server running...'))
+
+    // const operacao = {
+    //     descricao: 'Salário',
+    //     valor: 1000
+    // }
+    // const operacoes = db.collection('operacoes')
+    // operacoes.insert(operacao, (err, res) => {
+    //     console.log(res)
+    // })
+})
