@@ -5,7 +5,9 @@ const path = require('path')
 const express = require('express')
 const app = express()
 const port = 3000
+const bodyParser = require('body-parser')
 
+app.use(bodyParser.urlencoded({extended: false}))
 app.use(express.static('public'))
 
 //onde estão os templates
@@ -48,6 +50,20 @@ const findAll = (db, collectionName) => {
     })
 }
 
+const insert = (db, collectionName, document) => {
+    const collection = db.collection(collectionName)
+
+    return new Promise((resolve, reject) => {
+        collection.insert(document, (err, doc) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(doc)
+            }
+        })
+    })
+}
+
 app.get('/operacoes', async (req, res) => {
     const operacoes = await findAll(app.db, 'operacoes')
 
@@ -55,6 +71,16 @@ app.get('/operacoes', async (req, res) => {
 })
 
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
+app.post('/nova-operacao', async (req, res) => {
+    const operacao = {
+        descricao: req.body.descricao,
+        valor: parseFloat(req.body.valor)
+    }
+    const novaOperacao = await insert(app.db, 'operacoes', operacao)
+
+    res.redirect('/operacoes')
+})
+
 
 
 MongoClient.connect(mongoUri, (err, db) => {
@@ -64,13 +90,4 @@ MongoClient.connect(mongoUri, (err, db) => {
 
     app.db = db
     app.listen(port, () => console.log('Server running...'))
-
-    // const operacao = {
-    //     descricao: 'Salário',
-    //     valor: 1000
-    // }
-    // const operacoes = db.collection('operacoes')
-    // operacoes.insert(operacao, (err, res) => {
-    //     console.log(res)
-    // })
 })
