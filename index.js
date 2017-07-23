@@ -35,10 +35,26 @@ app.get('/calculadora', (req, res) => {
     res.render('calculadora', { resultado })
 })
 
-app.get('/operacoes', (req, res) => {
-    const operacoes = app.db.collection('operacoes')
-    operacoes.find({}).toArray((err, operacoes) => res.send(operacoes))
+const findAll = (db, collectionName) => {
+    const collection = db.collection(collectionName)
+    const cursor = collection.find({})
+    const documents = []
+
+    return new Promise((resolve, reject) => {
+        cursor.forEach(
+            (doc) => documents.push((doc)),
+            () => resolve(documents)
+        )
+    })
+}
+
+app.get('/operacoes', async (req, res) => {
+    const operacoes = await findAll(app.db, 'operacoes')
+
+    res.render('operacoes', { operacoes })
 })
+
+app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
 
 
 MongoClient.connect(mongoUri, (err, db) => {
