@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+}
+
+.header {
+    padding: 20px;
+    border: 2px solid #ccc;
+    text-align: center;
+}
+
+.content {
+    background-color: #ddd;
+}

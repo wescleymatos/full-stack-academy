@@ -14,4 +14,22 @@ app.get('/', (req, res) => {
     res.render('home')
 })
 
+const calculaJuros = (p, i, n) => p*Math.pow(1 + i, n)
+
+app.get('/calculadora', (req, res) => {
+    const resultado = {
+        calculado: false
+    }
+    if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
+        resultado.calculado = true
+        resultado.total = calculaJuros(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
+    }
+
+    res.render('calculadora', { resultado })
+})
+
 app.listen(port, () => console.log('Server running...'))
