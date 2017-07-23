@@ -1,0 +1,23 @@
+{
+  "name": "meu-dinheiro",
+  "version": "1.0.0",
+  "description": "Projeto criado no FullStackAcademy",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wescleymatos/full-stack-academy.git"
+  },
+  "author": "Wescley Matos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wescleymatos/full-stack-academy/issues"
+  },
+  "homepage": "https://github.com/wescleymatos/full-stack-academy#readme",
+  "dependencies": {
+    "express": "^4.15.3"
+  }
+}
