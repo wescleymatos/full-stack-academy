@@ -9,35 +9,9 @@ const app = express()
 const port = 3000
 const bodyParser = require('body-parser')
 
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(express.static('public'))
 
-//onde estão os templates
-app.set('views', path.join(__dirname, 'views'))
-//tipo de template
-app.set('view engine', 'ejs')
-
-app.get('/', (req, res) => {
-    res.render('home')
-})
-
+// functions
 const calculaJuros = (p, i, n) => p*Math.pow(1 + i, n)
-
-app.get('/calculadora', (req, res) => {
-    const resultado = {
-        calculado: false
-    }
-    if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
-        resultado.calculado = true
-        resultado.total = calculaJuros(
-            parseFloat(req.query.valorInicial),
-            parseFloat(req.query.taxa) / 100,
-            parseInt(req.query.tempo)
-        )
-    }
-
-    res.render('calculadora', { resultado })
-})
 
 const findAll = (db, collectionName) => {
     const collection = db.collection(collectionName)
@@ -65,6 +39,37 @@ const insert = (db, collectionName, document) => {
         })
     })
 }
+// end functions
+
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(express.static('public'))
+
+//onde estão os templates
+app.set('views', path.join(__dirname, 'views'))
+//tipo de template
+app.set('view engine', 'ejs')
+
+app.get('/', (req, res) => {
+    res.render('home')
+})
+
+
+app.get('/calculadora', (req, res) => {
+    const resultado = {
+        calculado: false
+    }
+    if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
+        resultado.calculado = true
+        resultado.total = calculaJuros(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
+    }
+
+    res.render('calculadora', { resultado })
+})
 
 app.get('/operacoes', async (req, res) => {
     const operacoes = await findAll(app.db, 'operacoes')
@@ -74,6 +79,7 @@ app.get('/operacoes', async (req, res) => {
 })
 
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
+
 app.post('/nova-operacao', async (req, res) => {
     const operacao = {
         descricao: req.body.descricao,
@@ -83,7 +89,6 @@ app.post('/nova-operacao', async (req, res) => {
 
     res.redirect('/operacoes')
 })
-
 
 
 MongoClient.connect(mongoUri, (err, db) => {
