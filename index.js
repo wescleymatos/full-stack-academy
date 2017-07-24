@@ -1,5 +1,7 @@
+require('dotenv').config()
+
 const MongoClient = require('mongodb').MongoClient
-const mongoUri = 'mongodb://admin:VuOd3VKlZCpBVLYQ@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/meu-dinheiro?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin'
+const mongoUri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/${process.env.DB_NAME}?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin`
 
 const path = require('path')
 const express = require('express')
@@ -67,7 +69,8 @@ const insert = (db, collectionName, document) => {
 app.get('/operacoes', async (req, res) => {
     const operacoes = await findAll(app.db, 'operacoes')
 
-    res.render('operacoes', { operacoes })
+    //res.render('operacoes', { operacoes })
+    res.send(operacoes)
 })
 
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
