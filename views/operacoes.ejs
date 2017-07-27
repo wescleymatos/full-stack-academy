@@ -1,5 +1,10 @@
 <% include header %>
     <h2>Operações</h2>
+    <p>Filtrar por:
+        <a href="/operacoes">Todos</a>
+        <a href="/operacoes?tipo=entradas">Entradas</a>
+        <a href="/operacoes?tipo=saidas">Saídas</a>
+   </p>
 
     <% operacoes.forEach((operacao) => { %>
         <p>

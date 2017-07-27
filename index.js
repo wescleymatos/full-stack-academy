@@ -36,9 +36,9 @@ const subtotal = operacoes => {
     })
 }
 
-const findAll = (db, collectionName) => {
+const find = (db, collectionName, conditions) => {
     const collection = db.collection(collectionName)
-    const cursor = collection.find({})
+    const cursor = collection.find(conditions)
     const documents = []
 
     return new Promise((resolve, reject) => {
@@ -80,7 +80,8 @@ app.get('/', (req, res) => {
 
 app.get('/calculadora', (req, res) => {
     const resultado = {
-        calculado: false
+        calculado: false,
+        evolucao: []
     }
     if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
         resultado.calculado = true
@@ -96,12 +97,23 @@ app.get('/calculadora', (req, res) => {
             parseInt(req.query.tempo)
         )
     }
-    console.log(resultado)
+
     res.render('calculadora', { resultado })
 })
 
 app.get('/operacoes', async (req, res) => {
-    const operacoes = await findAll(app.db, 'operacoes')
+    let conditions = {}
+    if (req.query.tipo && req.query.tipo === 'entradas') {
+        conditions = {
+            valor: { $gte: 0 }
+        }
+    } else if(req.query.tipo && req.query.tipo === 'saidas') {
+        conditions = {
+            valor: { $lt: 0 }
+        }
+    }
+
+    const operacoes = await find(app.db, 'operacoes', conditions)
     const novasOperacoes = subtotal(operacoes)
 
     res.render('operacoes', { operacoes: novasOperacoes })
