@@ -1,5 +1,7 @@
+require('dotenv').config()
+
 const MongoClient = require('mongodb').MongoClient
-const mongoUri = 'mongodb://admin:VuOd3VKlZCpBVLYQ@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/meu-dinheiro?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin'
+const mongoUri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/${process.env.DB_NAME}?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin`
 
 const path = require('path')
 const express = require('express')
@@ -7,18 +9,8 @@ const app = express()
 const port = 3000
 const bodyParser = require('body-parser')
 
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(express.static('public'))
 
-//onde estão os templates
-app.set('views', path.join(__dirname, 'views'))
-//tipo de template
-app.set('view engine', 'ejs')
-
-app.get('/', (req, res) => {
-    res.render('home')
-})
-
+// functions
 const calculaJuros = (p, i, n) => p*Math.pow(1 + i, n)
 const evolucao = (p, i, n) => Array
                                     .from(new Array(n), (n, i) => i + 1)
@@ -29,28 +21,6 @@ const evolucao = (p, i, n) => Array
                                         }
                                     })
 
-
-app.get('/calculadora', (req, res) => {
-    const resultado = {
-        calculado: false
-    }
-    if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
-        resultado.calculado = true
-        resultado.total = calculaJuros(
-            parseFloat(req.query.valorInicial),
-            parseFloat(req.query.taxa) / 100,
-            parseInt(req.query.tempo)
-        )
-
-        resultado.evolucao = evolucao(
-            parseFloat(req.query.valorInicial),
-            parseFloat(req.query.taxa) / 100,
-            parseInt(req.query.tempo)
-        )
-    }
-    console.log(resultado)
-    res.render('calculadora', { resultado })
-})
 
 const findAll = (db, collectionName) => {
     const collection = db.collection(collectionName)
@@ -78,6 +48,43 @@ const insert = (db, collectionName, document) => {
         })
     })
 }
+// end functions
+
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(express.static('public'))
+
+//onde estão os templates
+app.set('views', path.join(__dirname, 'views'))
+//tipo de template
+app.set('view engine', 'ejs')
+
+app.get('/', (req, res) => {
+    res.render('home')
+})
+
+
+app.get('/calculadora', (req, res) => {
+    const resultado = {
+        calculado: false
+    }
+    if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
+        resultado.calculado = true
+        resultado.total = calculaJuros(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
+
+        resultado.evolucao = evolucao(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
+    }
+    console.log(resultado)
+    res.render('calculadora', { resultado })
+})
 
 app.get('/operacoes', async (req, res) => {
     const operacoes = await findAll(app.db, 'operacoes')
@@ -86,6 +93,7 @@ app.get('/operacoes', async (req, res) => {
 })
 
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
+
 app.post('/nova-operacao', async (req, res) => {
     const operacao = {
         descricao: req.body.descricao,
@@ -95,7 +103,6 @@ app.post('/nova-operacao', async (req, res) => {
 
     res.redirect('/operacoes')
 })
-
 
 
 MongoClient.connect(mongoUri, (err, db) => {
