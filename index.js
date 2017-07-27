@@ -22,6 +22,20 @@ const evolucao = (p, i, n) => Array
                                     })
 
 
+const subtotal = operacoes => {
+    let sub = 0
+    return operacoes.map(operacao => {
+        sub += parseFloat(operacao.valor)
+        let novaOperacao = {
+            valor: operacao.valor,
+            descricao: operacao.descricao,
+            sub: sub
+        }
+
+        return novaOperacao
+    })
+}
+
 const findAll = (db, collectionName) => {
     const collection = db.collection(collectionName)
     const cursor = collection.find({})
@@ -88,8 +102,9 @@ app.get('/calculadora', (req, res) => {
 
 app.get('/operacoes', async (req, res) => {
     const operacoes = await findAll(app.db, 'operacoes')
+    const novasOperacoes = subtotal(operacoes)
 
-    res.render('operacoes', { operacoes })
+    res.render('operacoes', { operacoes: novasOperacoes })
 })
 
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
