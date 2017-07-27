@@ -11,6 +11,7 @@
             <%= operacao.descricao %> R$ <%= operacao.valor %>
             - Subtotal: R$ <%= operacao.sub %>
             - <a href="/operacoes/delete/<%= operacao._id %>">Excluir</a>
+            - <a href="/operacoes/edit/<%= operacao._id %>">Editar</a>
         </p>
     <% }) %>
 <% include footer %>

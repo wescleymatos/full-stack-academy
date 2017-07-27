@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const MongoClient = require('mongodb').MongoClient
+const ObjectID = require('mongodb').ObjectID
 const mongoUri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@meu-dinheiro-shard-00-00-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-01-qcut3.mongodb.net:27017,meu-dinheiro-shard-00-02-qcut3.mongodb.net:27017/${process.env.DB_NAME}?ssl=true&replicaSet=meu-dinheiro-shard-0&authSource=admin`
 
 const path = require('path')
@@ -63,6 +64,38 @@ const insert = (db, collectionName, document) => {
         })
     })
 }
+
+const remove  = (db, collectionName, documentId) => {
+    const collection = db.collection(collectionName)
+
+    return new Promise((resolve, reject) => {
+        collection.deleteOne({ _id: new ObjectID( documentId ) }, (err, result) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
+
+const update = (db, collectionName, id, values) => {
+    const collection = db.collection(collectionName)
+
+    return new Promise((resolve, reject) => {
+        collection.updateOne(
+            { _id: new ObjectID( id ) },
+            { $set: values },
+            (err, result) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(result)
+                }
+            }
+        )
+    })
+}
 // end functions
 
 app.set('port', (process.env.PORT || port));
@@ -85,6 +118,7 @@ app.get('/calculadora', (req, res) => {
         calculado: false,
         evolucao: []
     }
+
     if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
         resultado.calculado = true
         resultado.total = calculaJuros(
@@ -101,6 +135,37 @@ app.get('/calculadora', (req, res) => {
     }
 
     res.render('calculadora', { resultado })
+})
+
+app.get('/operacoes/delete/:id', async (req, res) => {
+    const operacoes = await remove(app.db, 'operacoes', req.params.id)
+
+    res.redirect('/operacoes')
+})
+
+app.get('/operacoes/edit/:id', async (req, res) => {
+    const operacoes = await find(app.db, 'operacoes', {
+        _id: new ObjectID( req.params.id )
+    })
+
+    if (operacoes.length === 0) {
+        res.redirect('operacoes')
+    } else {
+        res.render('edit-operacoes', { operacao: operacoes[0] })
+    }
+})
+
+app.post('/operacoes/edit/:id', async (req, res) => {
+    const operacoes = await find(app.db, 'operacoes', {
+        _id: new ObjectID( req.params.id )
+    })
+
+    if (operacoes.length === 0) {
+        res.redirect('operacoes')
+    } else {
+        const operacoes = await update(app.db, 'operacoes', req.params.id, req.body)
+        res.redirect('/operacoes')
+    }
 })
 
 app.get('/operacoes', async (req, res) => {
