@@ -27,6 +27,7 @@ const subtotal = operacoes => {
     return operacoes.map(operacao => {
         sub += parseFloat(operacao.valor)
         let novaOperacao = {
+            _id: operacao._id,
             valor: operacao.valor,
             descricao: operacao.descricao,
             sub: sub
@@ -64,6 +65,7 @@ const insert = (db, collectionName, document) => {
 }
 // end functions
 
+app.set('port', (process.env.PORT || port));
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(express.static('public'))
@@ -138,5 +140,5 @@ MongoClient.connect(mongoUri, (err, db) => {
     }
 
     app.db = db
-    app.listen(port, () => console.log('Server running...'))
+    app.listen(app.get('port'), () => console.log('Server running...'))
 })
