@@ -20,6 +20,15 @@ app.get('/', (req, res) => {
 })
 
 const calculaJuros = (p, i, n) => p*Math.pow(1 + i, n)
+const evolucao = (p, i, n) => Array
+                                    .from(new Array(n), (n, i) => i + 1)
+                                    .map(mes => {
+                                        return {
+                                            mes,
+                                            juros: calculaJuros(p, i, mes)
+                                        }
+                                    })
+
 
 app.get('/calculadora', (req, res) => {
     const resultado = {
@@ -32,8 +41,14 @@ app.get('/calculadora', (req, res) => {
             parseFloat(req.query.taxa) / 100,
             parseInt(req.query.tempo)
         )
-    }
 
+        resultado.evolucao = evolucao(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
+    }
+    console.log(resultado)
     res.render('calculadora', { resultado })
 })
 

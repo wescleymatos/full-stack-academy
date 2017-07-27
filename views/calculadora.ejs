@@ -11,4 +11,18 @@
         <h2>Resultado</h2>
         <p>R$ <%= resultado.total.toFixed(2) %></p>
     <% } %>
+
+    <h3>Evolução</h3>
+    <table>
+        <tr>
+            <th>Mês</th>
+            <th>Valor</th>
+        </tr>
+        <% resultado.evolucao.forEach((item) => { %>
+        <tr>
+            <td><%= item.mes %></td>
+            <td>R$  <%= item.juros.toFixed(2) %></td>
+        </tr>
+        <% }) %>
+    </table>
 <% include footer %>
