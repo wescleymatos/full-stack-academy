@@ -10,33 +10,9 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
+// Meus imports
+const CalculadoraService = require('./src/services/calculadora.service');
 
-// functions
-const calculaJuros = (p, i, n) => p*Math.pow(1 + i, n);
-const evolucao = (p, i, n) => Array
-                                    .from(new Array(n), (n, i) => i + 1)
-                                    .map(mes => {
-                                        return {
-                                            mes,
-                                            juros: calculaJuros(p, i, mes)
-                                        }
-                                    });
-
-
-const subtotal = operacoes => {
-    let sub = 0;
-    return operacoes.map(operacao => {
-        sub += parseFloat(operacao.valor);
-        let novaOperacao = {
-            _id: operacao._id,
-            valor: operacao.valor,
-            descricao: operacao.descricao,
-            sub: sub
-        };
-
-        return novaOperacao;
-    });
-}
 
 const find = (db, collectionName, conditions) => {
     const collection = db.collection(collectionName);
@@ -114,6 +90,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/calculadora', (req, res) => {
+    let calculadoraService = new CalculadoraService();
     const resultado = {
         calculado: false,
         evolucao: []
@@ -121,13 +98,13 @@ app.get('/calculadora', (req, res) => {
 
     if (req.query.valorInicial && req.query.taxa && req.query.tempo) {
         resultado.calculado = true;
-        resultado.total = calculaJuros(
+        resultado.total = calculadoraService.juros(
             parseFloat(req.query.valorInicial),
             parseFloat(req.query.taxa) / 100,
             parseInt(req.query.tempo)
         );
 
-        resultado.evolucao = evolucao(
+        resultado.evolucao = calculadoraService.evolucao(
             parseFloat(req.query.valorInicial),
             parseFloat(req.query.taxa) / 100,
             parseInt(req.query.tempo)
@@ -169,7 +146,9 @@ app.post('/operacoes/edit/:id', async (req, res) => {
 });
 
 app.get('/operacoes', async (req, res) => {
+    let calculadoraService = new CalculadoraService();
     let conditions = {};
+
     if (req.query.tipo && req.query.tipo === 'entradas') {
         conditions = {
             valor: { $gt: 0 }
@@ -179,10 +158,9 @@ app.get('/operacoes', async (req, res) => {
             valor: { $lt: 0 }
         };
     }
-    console.log(conditions);
+
     const operacoes = await find(app.db, 'operacoes', conditions);
-    console.log(operacoes);
-    const novasOperacoes = subtotal(operacoes);
+    const novasOperacoes = calculadoraService.subtotal(operacoes);
 
     res.render('operacoes', { operacoes: novasOperacoes });
 });
