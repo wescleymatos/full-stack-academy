@@ -1,8 +1,30 @@
 <% include header %>
-    <h2>Editar operação</h2>
-    <form method="POST">
-        Descrição: <input type="text" name="descricao" value="<%= operacao.descricao %>">
-        valor: <input type="text" name="valor" value="<%= operacao.valor %>">
-        <button type="submit">Enviar</button>
-    </form>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Editar operação</h3>
+                </div>
+                <div class="panel-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label for="descricao">Descrição</label>
+                                    <input type="text" class="form-control" name="descricao" id="descricao" placeholder="Salário" value="<%= operacao.descricao %>">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="valor">Valor</label>
+                                    <input type="text" class="form-control" id="valor" name="valor" placeholder="220.00" value="<%= operacao.valor %>">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 <% include footer %>
