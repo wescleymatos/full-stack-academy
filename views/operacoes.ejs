@@ -1,17 +1,42 @@
 <% include header %>
-    <h2>Operações</h2>
-    <p>Filtrar por:
-        <a href="/operacoes">Todos</a>
-        <a href="/operacoes?tipo=entradas">Entradas</a>
-        <a href="/operacoes?tipo=saidas">Saídas</a>
-   </p>
-
-    <% operacoes.forEach((operacao) => { %>
-        <p>
-            <%= operacao.descricao %> R$ <%= operacao.valor %>
-            - Subtotal: R$ <%= operacao.sub %>
-            - <a href="/operacoes/delete/<%= operacao._id %>">Excluir</a>
-            - <a href="/operacoes/edit/<%= operacao._id %>">Editar</a>
-        </p>
-    <% }) %>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Operações</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Filtrar por:
+                        <a href="/operacoes">Todos</a> |
+                        <a href="/operacoes?tipo=entradas">Entradas</a> |
+                        <a href="/operacoes?tipo=saidas">Saídas</a>
+                    </p>
+                    <hr>
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% operacoes.forEach((operacao) => { %>
+                            <tr>
+                                <td><%= operacao.descricao %></td>
+                                <td>R$ <%= operacao.valor %></td>
+                                <td><%= operacao.sub %></td>
+                                <td class="td-acoes">
+                                    <a class="btn btn-link" href="/operacoes/edit/<%= operacao._id %>">Editar</a>
+                                    <a class="btn btn-link" href="/operacoes/delete/<%= operacao._id %>">Excluir</a>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 <% include footer %>
