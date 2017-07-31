@@ -10,69 +10,9 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
-// Meus imports
 const CalculadoraService = require('./src/services/calculadora.service');
+const BaseRepository = require('./src/repositories/base.repository');
 
-
-const find = (db, collectionName, conditions) => {
-    const collection = db.collection(collectionName);
-    const cursor = collection.find(conditions);
-    const documents = [];
-
-    return new Promise((resolve, reject) => {
-        cursor.forEach(
-            (doc) => documents.push((doc)),
-            () => resolve(documents)
-        )
-    });
-}
-
-const insert = (db, collectionName, document) => {
-    const collection = db.collection(collectionName);
-
-    return new Promise((resolve, reject) => {
-        collection.insert(document, (err, doc) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(doc);
-            }
-        })
-    });
-}
-
-const remove  = (db, collectionName, documentId) => {
-    const collection = db.collection(collectionName);
-
-    return new Promise((resolve, reject) => {
-        collection.deleteOne({ _id: new ObjectID( documentId ) }, (err, result) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(result);
-            }
-        })
-    });
-}
-
-const update = (db, collectionName, id, values) => {
-    const collection = db.collection(collectionName);
-
-    return new Promise((resolve, reject) => {
-        collection.updateOne(
-            { _id: new ObjectID( id ) },
-            { $set: values },
-            (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result);
-                }
-            }
-        )
-    });
-}
-// end functions
 
 app.set('port', (process.env.PORT || port));
 
@@ -115,15 +55,17 @@ app.get('/calculadora', (req, res) => {
 });
 
 app.get('/operacoes/delete/:id', async (req, res) => {
-    const operacoes = await remove(app.db, 'operacoes', req.params.id);
+    let baseRepository = new BaseRepository(app.db, 'operacoes');
+    const documentId = new ObjectID( req.params.id );
+    const operacoes = await baseRepository.remove(documentId);
 
     res.redirect('/operacoes');
 });
 
 app.get('/operacoes/edit/:id', async (req, res) => {
-    const operacoes = await find(app.db, 'operacoes', {
-        _id: new ObjectID( req.params.id )
-    })
+    let baseRepository = new BaseRepository(app.db, 'operacoes');
+    const documentId = new ObjectID( req.params.id );
+    const operacoes = await baseRepository.find({_id: documentId});
 
     if (operacoes.length === 0) {
         res.redirect('operacoes');
@@ -133,20 +75,21 @@ app.get('/operacoes/edit/:id', async (req, res) => {
 });
 
 app.post('/operacoes/edit/:id', async (req, res) => {
-    const operacoes = await find(app.db, 'operacoes', {
-        _id: new ObjectID( req.params.id )
-    });
+    let baseRepository = new BaseRepository(app.db, 'operacoes');
+    const documentId = new ObjectID( req.params.id );
+    const operacoes = await baseRepository.find({_id: documentId});
 
     if (operacoes.length === 0) {
         res.redirect('operacoes');
     } else {
-        const operacoes = await update(app.db, 'operacoes', req.params.id, req.body);
+        const operacoes = await baseRepository.update(documentId, req.body);
         res.redirect('/operacoes');
     }
 });
 
 app.get('/operacoes', async (req, res) => {
     let calculadoraService = new CalculadoraService();
+    let baseRepository = new BaseRepository(app.db, 'operacoes');
     let conditions = {};
 
     if (req.query.tipo && req.query.tipo === 'entradas') {
@@ -159,7 +102,7 @@ app.get('/operacoes', async (req, res) => {
         };
     }
 
-    const operacoes = await find(app.db, 'operacoes', conditions);
+    const operacoes = await baseRepository.find(conditions);
     const novasOperacoes = calculadoraService.subtotal(operacoes);
 
     res.render('operacoes', { operacoes: novasOperacoes });
@@ -168,11 +111,12 @@ app.get('/operacoes', async (req, res) => {
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'));
 
 app.post('/nova-operacao', async (req, res) => {
+    let baseRepository = new BaseRepository(app.db, 'operacoes');
     const operacao = {
         descricao: req.body.descricao,
         valor: parseFloat(req.body.valor)
     };
-    const novaOperacao = await insert(app.db, 'operacoes', operacao);
+    const novaOperacao = await baseRepository.insert(operacao);
 
     res.redirect('/operacoes');
 });
